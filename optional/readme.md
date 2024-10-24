@@ -32,7 +32,6 @@ Here's how it works:
 
 
 4. Control Flow:
-
-Main script can check what to do next
-Handles timing of pauses and resumes
-Manages overall session duration
+   Main script can check what to do next
+   Handles timing of pauses and resumes
+   Manages overall session duration
