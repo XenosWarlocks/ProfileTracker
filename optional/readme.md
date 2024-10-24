@@ -11,3 +11,28 @@ Here's how it works:
     max_duration=(8, 10)       # Run time (8 to 10hrs)
     )
    ```
+### Key features of this version:
+
+1. State Management:
+   Uses a JSON file to maintain state between runs
+   Allows other processes to check the current state
+   Manages transitions between running, paused, and stopped states
+
+
+4. Communication:
+   Returns dictionaries with clear actions and parameters
+   Can be easily integrated with async or sync code
+   Maintains session timing across pauses
+
+
+5. Flexibility:
+   Can be imported and used by any script
+   All ranges and timings are customizable
+   State file location can be configured
+
+
+4. Control Flow:
+
+Main script can check what to do next
+Handles timing of pauses and resumes
+Manages overall session duration
