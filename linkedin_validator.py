@@ -1,19 +1,15 @@
 from tkinter import filedialog, messagebox
-from selenium import webdriver
+import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
-from datetime import datetime
-
-import pandas as pd
+# from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import time
+from datetime import datetime
 import os
 import getpass
 import tkinter as tk
-# removed from tkinter import filedialog
-# removed from tkinter import messagebox
 
 
 class LinkedInValidator:
