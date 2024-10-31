@@ -16,6 +16,8 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.common.action_chains import ActionChains
 
+from name_gen import UsernameGenerator
+
 class IdentityGenerator:
     # Extended name databases
     NAMES_DB = {
@@ -186,14 +188,22 @@ class IdentityGenerator:
                         time.sleep(1)
         return False
     
-    def try_create_email(self, name_dict, max_attempts=5):
+    def try_create_email(self, name_dict, max_attempts=20):
         """
-        Attempt to create an email address and verify its availability.
-        Returns a tuple (email, success) where success is True if an available email was found.
+        Attempt to create an email address and verify its availability
         """
         attempts = 0
+        tried_emails = set()
+        
         while attempts < max_attempts:
-            email = self.create_email(name_dict)
+            email = self.create_email(name_dict, attempts)
+            
+            # Skip if we've already tried this email
+            if email in tried_emails:
+                attempts += 1
+                continue
+                
+            tried_emails.add(email)
             email_prefix = email.split('@')[0]
             
             try:
@@ -203,9 +213,9 @@ class IdentityGenerator:
                     "Username",
                     condition="clickable"
                 )
-                # Clear any existing input
                 email_input.clear()
                 self.type_like_human(email_input, email_prefix)
+                self.random_delay(1, 2)  # Add small delay between typing and clicking
                 
                 # Click Next after email
                 next_button = self.wait_and_find_element(
@@ -215,12 +225,12 @@ class IdentityGenerator:
                 )
                 self.safe_click(next_button)
                 
-                # Check for error message
+                # Check for error message with a shorter timeout
                 try:
                     error_message = self.wait_and_find_element(
                         By.XPATH,
                         "//*[contains(text(), 'That username is taken')]",
-                        timeout=3
+                        timeout=2
                     )
                     print(f"Username {email_prefix} is taken, trying another...")
                     attempts += 1
@@ -234,8 +244,27 @@ class IdentityGenerator:
                 print(f"Error checking username availability: {str(e)}")
                 attempts += 1
         
-        return None, False
+        return None, False  
 
+    def create_email(self, name_dict, attempt=0):
+        """Create email with enhanced username generation"""
+        if not hasattr(self, 'username_generator'):
+            self.username_generator = UsernameGenerator()
+        
+        variations = self.username_generator.create_username_variations(
+            name_dict['first'],
+            name_dict['middle'],
+            name_dict['last']
+        )
+        
+        # If we've tried all variations, create some completely random ones
+        if attempt >= len(variations):
+            username = f"{name_dict['first'].lower()}{random.randint(10000, 99999)}"
+        else:
+            username = variations[attempt]
+        
+        return f"{username}@gmail.com"
+    
     def create_gmail_account(self, headless=False, recovery_email=None, recovery_phone=None):
         """Create Gmail account following the exact sequence"""
         if not self.identity:
@@ -361,7 +390,7 @@ class IdentityGenerator:
                 print("Confirming password...")
                 confirm_password_input = self.wait_and_find_element(
                     By.NAME, 
-                    "ConfirmPasswd",
+                    "PasswdAgain",
                     condition="clickable"
                 )
                 self.type_like_human(confirm_password_input, self.identity['password'])
@@ -446,29 +475,6 @@ class IdentityGenerator:
             'full_name': full_name
         }
 
-    def create_email(self, name_dict):
-        """Create email with more varied patterns"""
-        first = name_dict['first'].lower()
-        middle = name_dict['middle'].lower() if name_dict['middle'] else ''
-        last = name_dict['last'].lower()
-        year = random.randint(1980, 2000)
-        
-        email_formats = [
-            f"{first}.{last}@gmail.com",
-            f"{first}{last}{year}@gmail.com",
-            f"{first[0]}{last}@gmail.com",
-            f"{first}.{last}{random.randint(1, 999)}@gmail.com",
-            f"{first}{last[0]}{year}@gmail.com"
-        ]
-        
-        # Add middle name variants if middle name exists
-        if middle:
-            email_formats.extend([
-                f"{first}{middle[0]}{last}@gmail.com",
-                f"{first}.{middle[0]}.{last}@gmail.com"
-            ])
-        
-        return random.choice(email_formats)
 
     def generate_password(self):
         """Generate a more complex password"""
