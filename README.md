@@ -99,3 +99,7 @@ validator.run()
 - Error Handling: Enable debug mode when troubleshooting issues
 - Data Privacy: Never commit LinkedIn credentials to version control
 - CSV Backup: Keep backups of your input CSV files
+
+## WorkFlow
+
+![Diagram](assets/diagram.png)
